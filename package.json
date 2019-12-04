@@ -1,13 +1,18 @@
 {
-  "name": "procedures-framework",
-  "version": "0.0.0",
-  "description": "A framework for writing clean, action-based software",
+  "name": "procecurejs",
+  "version": "1.0.0-alpha.0.1",
+  "description": "A lightweight framework for building readable software from sequences of atomic actions.",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/nrwinner/procedurejs"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "start": "node dist/example/app.js",
     "build": "./node_modules/typescript/bin/tsc -build source/tsconfig.json && ./node_modules/typescript/bin/tsc -build example/tsconfig.json",
-    "serve": "./node_modules/.bin/nodemon --watch ./example --watch ./source --exec 'npm run build && npm start'"
+    "serve": "./node_modules/.bin/nodemon --watch ./example --watch ./source --exec 'npm run build && npm start'",
+    "prepublishOnly" : "npm run build"
   },
   "author": "Nick Winner",
   "license": "MIT",
@@ -15,7 +20,6 @@
     "uuidv4": "^5.0.1"
   },
   "devDependencies": {
-    "express": "^4.17.1",
     "nodemon": "^1.19.4",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
@@ -26,6 +30,7 @@
     "ignore": [
       "lib/**",
       "dist/*"
-    ]
+    ],
+    "files": ["lib/*"]
   }
 }
