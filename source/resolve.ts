@@ -14,7 +14,6 @@ export default function resolve(...props: string[]) {
         }
         
         const transaction = Store.getInstance().get(transactionId);
-
         
         // if we couldn't find a transaction for the given parameter, call the original function without attempting to resolve
         if (!transaction) {
@@ -22,10 +21,12 @@ export default function resolve(...props: string[]) {
           return original.apply(this, [ transactionId, ...args ])
         }
 
+        // resolve the requested properties from the transaction
         for (const p of props) {
           properties[p] = transaction.getAttribute(p);
         }
 
+        // create an optional log parameter that the target function can use to manually add logs to the active transaction
         const log = (message: string, data?: any) => {
           transaction.addToLog({ message, data });
         }

@@ -8,6 +8,7 @@ export default function action(name) {
         return original.apply(this, args);
       }
 
+      // add the function to the global action registry
       Registry.getInstance().set(name, descriptor.value);
     }
     return descriptor;
