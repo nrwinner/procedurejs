@@ -1,4 +1,4 @@
-import { action, resolve, Procedure } from '../source';
+import { action, resolve, Procedure } from '../lib';
 
 enum ACTIONS {
   FETCH_OBJECT = 'fetch object',
