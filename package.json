@@ -1,7 +1,7 @@
 {
   "name": "procedurejs",
   "version": "1.0.0-alpha.0.2",
-  "description": "A lightweight framework for building readable software from sequences of atomic actions.",
+  "description": "Create readable software from sequences of atomic actions.",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwinner/procedurejs"
