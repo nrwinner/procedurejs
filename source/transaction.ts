@@ -3,7 +3,7 @@ import uuid from 'uuidv4';
 export interface TransactionLogEntry {
   name: string;
   messages: { message: string, data?: any }[];
-  error?: string;
+  error?: Error;
 }
 
 export class Transaction {
@@ -37,7 +37,7 @@ export class Transaction {
 
   transactionError(error: Error) {
     const activeLog = this.log.pop();
-    activeLog.error = JSON.stringify(error, Object.getOwnPropertyNames(error));
+    activeLog.error = error
     this.log.push(activeLog);
     this.error = true;
   }
@@ -50,6 +50,11 @@ export class Transaction {
   attributeDump() {
     // deep copy this.attributes juuuust to make sure there are no lingering references
     return Object.assign({}, this.attributes);
+  }
+
+  concat(transaction: Transaction) {
+    // this.attributes = Object.assign(this.attributes, transaction.attributes);
+    this.log = this.log.concat(transaction.log);
   }
 
   private makeDump() {

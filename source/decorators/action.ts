@@ -1,4 +1,4 @@
-import { Registry } from './registry';
+import { Registry } from '../registry';
 
 export default function action(name) {
   return function decorator(_, __, descriptor) {

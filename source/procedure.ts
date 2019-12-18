@@ -3,10 +3,10 @@ import { Store } from './store';
 import { Registry } from './registry';
 
 export class Procedure {
-  private steps: string[];
+  private steps: (string | ((transaction) => string))[];
   private transaction = new Transaction();
 
-  constructor(...steps: string[]) {
+  constructor(...steps: (string | ((transaction) => string))[]) {
     this.steps = steps;
     Store.getInstance().set(this.transaction);
   }
@@ -17,7 +17,15 @@ export class Procedure {
       this.transaction.setAttribute(key, initialProperties[key]);
     }
 
-    for (const name of this.steps) {
+    for (const action of this.steps) {
+      let name: string;
+
+      if (typeof action !== 'string') {
+        name = action(this.transaction);
+      } else {
+        name = action;
+      }
+
       this.transaction.createLog(name);
 
       let result: { [key: string]: any };
@@ -37,6 +45,6 @@ export class Procedure {
 
     Store.getInstance().destroy(this.transaction.id);
 
-    return this.transaction.fullDump();
+    return this.transaction;
   }
 }
