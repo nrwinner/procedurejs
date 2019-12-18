@@ -3,22 +3,16 @@ import { action, resolve } from '../lib/decorators';
 import { map } from '../lib/operators';
 import * as request from 'request-promise-native';
 
-enum ACTIONS {
-  FETCH_OBJECTS = 'fetch objects',
-  MUTATE_OBJECT = 'mutate object'
-}
-
 export class Actions {
 
-  @action(ACTIONS.FETCH_OBJECTS)
+  @action('fetch objects')
   @resolve('id')
   async fetchObject(props: { id: string }) {
-    console.log('id is', props.id);
     // pretend this makes a database call to fetch an object from props.id
     return Promise.resolve({ objects: [ { name: 'Im a little bean' }, { name: 'Im a bigger bean' } ] });
   }
 
-  @action(ACTIONS.MUTATE_OBJECT)
+  @action('mutate object')
   @resolve('object')
   async mutateObject(props: { object: { name: string } }, log: (message: string, data?: any) => { }) {
     // log the value of object as it exists right now
@@ -42,8 +36,13 @@ export class Actions {
 }
 
 new Procedure(
-  ACTIONS.FETCH_OBJECTS,
-  map('mutate object', 'change object name').forEach({ object: 'objects' })
+  'fetch objects',
+  map(
+    'mutate object',
+  )
+    .filter(x => (x.name as string).includes('little'))
+    .forEach({ object: 'objects' }),
+  map('change object name').forEach({ object: 'objects' })
 ).run({ id: 'someid' }).then(transaction => {
   console.log('The objects are now', transaction.attributes.objects);
 }).catch(transaction => {

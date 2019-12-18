@@ -8,9 +8,10 @@ export default function map(...actions: string[]): MapProcedure{
 }
 
 class MapProcedure {
+  private predicate?: (x: any) => boolean;
+
   constructor(
-    private actions: string[],
-    public actionName = uuid()
+    private actions: string[]
   ) { }
 
   forEach(data: { [key: string]: string }): (transaction) => string {
@@ -20,13 +21,18 @@ class MapProcedure {
       const newActionName = uuid();
 
       Registry.getInstance().set(newActionName, async () => {
-        let collection = transaction.getAttribute(collectionName);
+        const originalCollection = transaction.getAttribute(collectionName);
+        let collection = Array.from(originalCollection);
 
         collection = await Promise.all(collection.map(async c => {
-          return new Procedure(...this.actions).run({ [key]: c }).then((childTransaction: Transaction) => {
-            transaction.concat(childTransaction); 
-            return childTransaction.getAttribute(key);
-          });
+          if (!this.predicate || this.predicate(c)) {
+            return new Procedure(...this.actions).run({ [key]: c }).then((childTransaction: Transaction) => {
+              transaction.concat(childTransaction); 
+              return childTransaction.getAttribute(key);
+            });
+          }
+
+          return c;
         }))
 
         return  { [collectionName]: collection }
@@ -34,5 +40,10 @@ class MapProcedure {
 
       return newActionName;
     }
+  }
+
+  filter(predicate: (x: any) => boolean) {
+    this.predicate = predicate;
+    return this;
   }
 }
