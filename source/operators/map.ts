@@ -3,47 +3,29 @@ import { Registry } from '../registry';
 import { Transaction } from '../transaction';
 import { Procedure } from '..';
 
-export default function map(...actions: string[]): MapProcedure{
-  return new MapProcedure(actions)
-}
+export default function map(data: { [key: string]: string }, predicate?: (x?: any) => boolean) {
+  const [key, collectionName] = Object.entries(data)[0];
+  const newActionName = uuid();
 
-class MapProcedure {
-  private predicate?: (x: any) => boolean;
+  return (transaction: Transaction, actions: string[]) => {
+    
+    Registry.getInstance().set(newActionName, async () => {
+      let collection = transaction.getAttribute(collectionName);
 
-  constructor(
-    private actions: string[]
-  ) { }
+      collection = await Promise.all(collection.map(async c => {
+        if (!predicate || predicate(c)) {
+          return new Procedure(...actions).run({ [key]: c }).then((childTransaction: Transaction) => {
+            transaction.concat(childTransaction); 
+            return childTransaction.getAttribute(key);
+          });
+        }
 
-  forEach(data: { [key: string]: string }): (transaction) => string {
-    let [key, collectionName] = Object.entries(data)[0];
+        return c;
+      }))
 
-    return (transaction: Transaction) => {
-      const newActionName = uuid();
+      return  { [collectionName]: collection }
+    });
 
-      Registry.getInstance().set(newActionName, async () => {
-        const originalCollection = transaction.getAttribute(collectionName);
-        let collection = Array.from(originalCollection);
-
-        collection = await Promise.all(collection.map(async c => {
-          if (!this.predicate || this.predicate(c)) {
-            return new Procedure(...this.actions).run({ [key]: c }).then((childTransaction: Transaction) => {
-              transaction.concat(childTransaction); 
-              return childTransaction.getAttribute(key);
-            });
-          }
-
-          return c;
-        }))
-
-        return  { [collectionName]: collection }
-      });
-
-      return newActionName;
-    }
-  }
-
-  filter(predicate: (x: any) => boolean) {
-    this.predicate = predicate;
-    return this;
+    return newActionName;
   }
 }

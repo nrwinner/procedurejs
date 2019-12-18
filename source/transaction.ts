@@ -52,8 +52,11 @@ export class Transaction {
     return Object.assign({}, this.attributes);
   }
 
-  concat(transaction: Transaction) {
-    // this.attributes = Object.assign(this.attributes, transaction.attributes);
+  concat(transaction: Transaction, attributes?: boolean) {
+    if (attributes) {
+      this.attributes = Object.assign(this.attributes, transaction.attributes);
+    }
+
     this.log = this.log.concat(transaction.log);
   }
 

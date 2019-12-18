@@ -1,2 +1,4 @@
 import map from './map';
-export { map };
+import doIf from './doIf';
+import actions from './actions'
+export { actions, doIf, map };

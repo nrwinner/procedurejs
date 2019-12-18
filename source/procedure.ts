@@ -3,10 +3,10 @@ import { Store } from './store';
 import { Registry } from './registry';
 
 export class Procedure {
-  private steps: (string | ((transaction) => string))[];
-  private transaction = new Transaction();
+  private steps: (string | ((transaction) => string | Promise<string>))[];
+  transaction = new Transaction();
 
-  constructor(...steps: (string | ((transaction) => string))[]) {
+  constructor(...steps: (string | ((transaction) => string | Promise<string>))[]) {
     this.steps = steps;
     Store.getInstance().set(this.transaction);
   }
@@ -21,7 +21,11 @@ export class Procedure {
       let name: string;
 
       if (typeof action !== 'string') {
-        name = action(this.transaction);
+        name = await action(this.transaction);
+        
+        if (!name) {
+          continue;
+        }
       } else {
         name = action;
       }

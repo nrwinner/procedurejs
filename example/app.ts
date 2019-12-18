@@ -1,6 +1,7 @@
 import { Procedure } from '../lib';
 import { action, resolve } from '../lib/decorators';
-import { map } from '../lib/operators';
+import { actions, doIf, map } from '../lib/operators';
+
 import * as request from 'request-promise-native';
 
 export class Actions {
@@ -37,12 +38,17 @@ export class Actions {
 
 new Procedure(
   'fetch objects',
-  map(
-    'mutate object',
-  )
-    .filter(x => (x.name as string).includes('little'))
-    .forEach({ object: 'objects' }),
-  map('change object name').forEach({ object: 'objects' })
+  actions(
+    'mutate object'
+  ).apply(
+    map({ object: 'objects' })
+  ),
+  actions(
+    'change object name',
+  ).apply(
+    doIf({ objects: (objects) => objects.length > 1 }),
+    map({ object: 'objects' }, object => object.name.includes('little'))
+  ),
 ).run({ id: 'someid' }).then(transaction => {
   console.log('The objects are now', transaction.attributes.objects);
 }).catch(transaction => {
