@@ -2,32 +2,31 @@ import { Transaction } from './transaction';
 import { Store } from './store';
 import { Registry } from './registry';
 
+export type Operator = (transaction: Transaction) => Promise<any>
+
 export class Procedure {
-  private steps: (string | ((transaction) => string | Promise<string>))[];
+  private steps: (string | Operator)[];
   transaction = new Transaction();
 
-  constructor(...steps: (string | ((transaction) => string | Promise<string>))[]) {
+  constructor(...steps: (string | Operator)[]) {
     this.steps = steps;
     Store.getInstance().set(this.transaction);
   }
 
-  async run(initialProperties: { [key: string]: any }): Promise<{ [key: string]: any }> {
+  async run(initialProperties: { [key: string]: any }): Promise<Transaction> {
     // populate intiial properties into transaction
     for (let key in initialProperties) {
       this.transaction.setAttribute(key, initialProperties[key]);
     }
 
-    for (const action of this.steps) {
+    for (const step of this.steps) {
       let name: string;
 
-      if (typeof action !== 'string') {
-        name = await action(this.transaction);
-        
-        if (!name) {
-          continue;
-        }
+      if (typeof step !== 'string') {
+        await step(this.transaction);
+        continue;
       } else {
-        name = action;
+        name = step;
       }
 
       this.transaction.createLog(name);

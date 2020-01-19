@@ -10,7 +10,7 @@ export class Transaction {
   id: string;
   error: boolean;
 
-  private attributes: { [key: string]: any } = {};
+  attributes: { [key: string]: any } = {};
   private log: TransactionLogEntry[] = [];
 
   constructor() {

@@ -1,6 +1,6 @@
 import { Procedure } from '../lib';
 import { action, resolve } from '../lib/decorators';
-import { actions, doIf, map } from '../lib/operators';
+import { actions, alias, doIf } from '../lib/operators';
 
 import * as request from 'request-promise-native';
 
@@ -34,23 +34,28 @@ export class Actions {
       return { object: props.object };
     })
   }
+
+  @action('create object')
+  @resolve('objects')
+  async createObject(props: { objects: any[] }) {
+    // generate a random number 1 <= x <= 10
+    const id = Math.ceil(Math.random() * 10);
+    const name = await request('https://jsonplaceholder.typicode.com/users/' + id).then(user => {
+      return JSON.parse(user).name;
+    });
+
+    return { objects: props.objects.concat([{ name }]) };
+  }
 }
 
 new Procedure(
   'fetch objects',
-  actions(
-    'mutate object'
-  ).apply(
-    map({ object: 'objects' })
+  actions('create object').apply(
+    doIf({ objects: (o) => o.length < 10 })
   ),
-  actions(
-    'change object name',
-  ).apply(
-    doIf({ objects: (objects) => objects.length > 1 }),
-    map({ object: 'objects' }, object => object.name.includes('little'))
-  ),
+  alias('objects', 'woohoo'),
 ).run({ id: 'someid' }).then(transaction => {
-  console.log('The objects are now', transaction.attributes.objects);
+  console.log(transaction.attributes.objects)
 }).catch(transaction => {
   console.log('An error occured!', transaction.log);
 });

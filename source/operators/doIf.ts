@@ -1,12 +1,15 @@
-import uuid from 'uuidv4';
-import { Registry } from '../registry';
+import { Operator, Procedure } from '../procedure';
 import { Transaction } from '../transaction';
-import { Procedure } from '..';
 
-export default function doIf(data: { [key: string]: (x: any) => boolean }): (x: Transaction) => boolean {
-  const [key, predicate] = Object.entries(data)[0];
+export default function doIf(prop: { [key: string]: boolean | ((x) => boolean | Promise<boolean>) }) {
+  const [key, predicate] = Object.entries(prop)[0]
 
-  return (transaction: Transaction): boolean => {
-    return predicate(transaction.getAttribute(key));
+  return async (transaction: Transaction, procedure: () => Promise<Transaction>) => {
+    const value = transaction.getAttribute(key);
+    
+    if ((typeof predicate === 'function' && predicate(value)) || (typeof predicate !== 'function' && predicate)) {
+      const newTransaction = await procedure();
+      transaction.concat(newTransaction, true);
+    }
   }
 }

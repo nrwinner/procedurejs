@@ -1,4 +1,5 @@
-import map from './map';
+import actions from './actions';
+import alias from './alias';
 import doIf from './doIf';
-import actions from './actions'
-export { actions, doIf, map };
+
+export { actions, alias, doIf };

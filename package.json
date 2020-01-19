@@ -9,9 +9,9 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "npm run build && node dist/app.js",
     "build": "./node_modules/typescript/bin/tsc -build source/tsconfig.json && ./node_modules/typescript/bin/tsc -build example/tsconfig.json",
-    "serve": "./node_modules/.bin/nodemon --watch ./example --watch ./source --exec 'npm run build && npm start'",
+    "serve": "./node_modules/.bin/nodemon --watch ./example --watch ./source --exec npm start",
     "prepublishOnly": "npm run build"
   },
   "author": "Nick Winner",
